@@ -1,0 +1,59 @@
+service: aws-serverless-contact-form
+
+custom:
+  email: put.your.email.here@gmail.com
+  topicName: aws-serverless-contact-form-sns-topic
+  topicARN: "arn:aws:sns:#{AWS::Region}:#{AWS::AccountId}:${self:custom.topicName}"
+
+provider:
+  name: aws
+  profile: private
+  region: eu-central-1
+  runtime: nodejs6.10
+  stage: production
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - sns:Publish
+      Resource: "${self:custom.topicARN}"
+
+functions:
+  sls-contact-forms:
+    handler: src/main.handler
+    environment:
+      SNS_TOPIC_ARN: ${self:custom.topicARN}
+    events:
+      - http:
+          path: aws-portfolio-static-website-contact-form
+          method: post
+          cors:
+            origin: https://your-site-url.amazonaws.com
+            allowCredentials: true
+            headers:
+              - Authorization
+              - Content-Type
+              - X-Api-Key
+              - X-Amz-Date
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+
+plugins:
+  - serverless-pseudo-parameters
+
+resources:
+  Description: |
+    Serverless back-end stack which handles contact forms including:
+    * AWS Lambda implementation
+    * Necessary IAM permissions
+    * SNS topic and Email subscription for various contact
+    * API Gateway configuration (including CORS)
+
+  Resources:
+    ContactUsTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        DisplayName: SNS topic for Contact Pages
+        TopicName: ${self:custom.topicName}
+        Subscription:
+          - Endpoint: ${self:custom.email}
+            Protocol: email-json

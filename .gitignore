@@ -1,0 +1,9 @@
+# Depndencies:
+node_modules/
+jspm_packages/
+
+# Serverless directories:
+.serverless
+
+# Lambda package:
+*.zip
