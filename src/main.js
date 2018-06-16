@@ -5,13 +5,21 @@ const { SNS } = require("aws-sdk");
 
 const ORIGIN = process.env.ORIGIN || "http://localhost";
 
+const removeTrailingSlash = (string) => {
+  if (string[string.length - 1] === "/") {
+    return string.slice(0, -1);
+  }
+
+  return string;
+};
+
 const buildHeaders = (origin) => {
   const headers = {
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Authorization, Content-Type, X-Api-Key, X-Amz-Date, X-Amz-Security-Token, X-Amz-User-Agent",
   };
 
-  if (ORIGIN === origin){
+  if (removeTrailingSlash(ORIGIN) === removeTrailingSlash(origin)) {
     headers["Access-Control-Allow-Origin"] = origin;
   }
 
